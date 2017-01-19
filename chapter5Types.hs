@@ -319,16 +319,16 @@ munge f1 f2 x = fst (f2 (f1 x))
 
 -- 5.10 Definitions
 
-Polymorphism refers to type variables which may refer to more than one concrete type, usually manifested as parametric or ad-hoc polymorphism
+-- Polymorphism refers to type variables which may refer to more than one concrete type, usually manifested as parametric or ad-hoc polymorphism
 
-the principle type is the most generic type which still typechecks
+-- the principle type is the most generic type which still typechecks
 
-type inference is the ability to infer principal types from terms
+-- type inference is the ability to infer principal types from terms
 
-Type variable allows us to refer to an unspecified type or set of types
+-- Type variable allows us to refer to an unspecified type or set of types
 
-a typeclass is a way to express faculties or interfaces that more than one datatype has in common
+-- a typeclass is a way to express faculties or interfaces that more than one datatype has in common
 
-parametricity is the property that exists within parametric polymorphism, this states that a function will be uniform across all concrete applications
+-- parametricity is the property that exists within parametric polymorphism, this states that a function will be uniform across all concrete applications
 
-ad-hoc polymorphism is polymorphism that appies one or more typeclass constraints to what would otherwise be a paraolymorphic type variable
+-- ad-hoc polymorphism is polymorphism that appies one or more typeclass constraints to what would otherwise be a paraolymorphic type variable
