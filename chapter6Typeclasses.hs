@@ -50,3 +50,49 @@ divideThenAdd x y = (x / y) + 1
 -- this will work because we are comparing two instances of Num typeclass
 
 -- 6.8 Enum
+-- 6.9 Show
+
+data Mood = Blah
+
+instance Show Mood where
+    show _ = "Blah"
+
+-- 6.10 Read - takes a string and turns it into a thing, no way this will always work.
+
+-- 6.11 Instances are dispatched by type
+-- a typeclass defines a set of functions and/or values
+-- types have instances of that typeclass
+-- the instances specify the ways that type uses the functions of the typeclass
+
+-- 6.12 Writing typeclass instances
+
+data Trivial = Trivial'
+
+instance Eq Trivial where
+  Trivial' == Trivial' = True
+
+data DayOfWeek =
+  Mon | Tue | Wed | Thu | Fri | Sat | Sun
+
+data Date =
+  Date DayOfWeek Int
+
+instance Eq DayOfWeek where
+  (==) Mon Mon = True
+  (==) Tue Tue = True
+  (==) Wed Wed = True
+  (==) Thu Thu = True
+  (==) Fri Fri = True
+  (==) Sat Sat = True
+  (==) Sun Sun = True
+  (==) _ _     = False
+
+instance Eq Date where
+  (==) (Date weekday dayOfMonth)
+       (Date weekday' dayOfMonth') =
+    weekday == weekday' && dayOfMonth == dayOfMonth'
+
+data Identity a = Identity a
+
+-- instance Eq (Identity a) where
+--   (==) (Identity v) (Identity v') = v == v'
