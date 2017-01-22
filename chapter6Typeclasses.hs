@@ -72,7 +72,7 @@ instance Eq Trivial where
   Trivial' == Trivial' = True
 
 data DayOfWeek =
-  Mon | Tue | Wed | Thu | Fri | Sat | Sun
+  Mon | Tue | Wed | Thu | Fri | Sat | Sun deriving (Ord, Show)
 
 data Date =
   Date DayOfWeek Int
@@ -94,5 +94,64 @@ instance Eq Date where
 
 data Identity a = Identity a
 
--- instance Eq (Identity a) where
---   (==) (Identity v) (Identity v') = v == v'
+instance Eq a => Eq (Identity a) where
+   (==) (Identity v) (Identity v') = v == v'
+
+-- Exercises: Eq Instances
+
+-- 1
+
+data TisAnInteger = TisAn Integer
+
+instance Eq TisAnInteger where
+   (==) (TisAn x) (TisAn y) = x == y
+
+-- 2
+
+data TwoIntegers = Two Integer Integer
+
+instance Eq TwoIntegers where
+    (==) (Two a b) (Two c d) = a == c && b == d
+
+-- 3
+
+data StringOrInt = TisAString String | TisAnInt Int 
+
+instance Eq StringOrInt where
+    (==) (TisAString x') (TisAString y') = x' == y'
+    (==) (TisAnInt x) (TisAnInt y) = x == y
+    (==) _ _ = False
+
+-- 4
+
+data Pair a = Pair a a
+
+instance Eq a => Eq (Pair a) where
+    (==) (Pair v1 v2) (Pair v1' v2') = v1 == v1' && v2 == v2'
+
+-- 5
+
+data Tuple a b = Tuple a b
+
+instance (Eq a, Eq b) => Eq (Tuple a b) where
+    (==) (Tuple x y) (Tuple x' y') = x == x' && y == y'
+
+-- 6
+
+data Which a = ThisOne a | ThatOne a
+
+instance Eq a => Eq (Which a) where
+    (==) (ThisOne x) (ThisOne x') = x == x'
+    (==) (ThatOne x) (ThatOne x') = x == x'
+    (==) _ _ = False
+
+-- 7
+
+data EitherOr a b = Hello a | Goodbye b
+
+instance (Eq a, Eq b) => Eq (EitherOr a b) where
+    (==) (Hello x) (Hello x') = x == x'
+    (==) (Goodbye y) (Goodbye y') = y == y'
+    (==) _ _ = False
+
+-- Ord Instances
