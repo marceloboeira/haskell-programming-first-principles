@@ -52,10 +52,10 @@ divideThenAdd x y = (x / y) + 1
 -- 6.8 Enum
 -- 6.9 Show
 
-data Mood = Blah
+-- data Mood = Blah
 
-instance Show Mood where
-    show _ = "Blah"
+-- instance Show Mood where
+--     show _ = "Blah"
 
 -- 6.10 Read - takes a string and turns it into a thing, no way this will always work.
 
@@ -115,12 +115,12 @@ instance Eq TwoIntegers where
 
 -- 3
 
-data StringOrInt = TisAString String | TisAnInt Int 
+data StringOrInt = TisAString String | TisAnInt Int
 
 instance Eq StringOrInt where
     (==) (TisAString x') (TisAString y') = x' == y'
-    (==) (TisAnInt x) (TisAnInt y) = x == y
-    (==) _ _ = False
+    (==) (TisAnInt x) (TisAnInt y)       = x == y
+    (==) _ _                             = False
 
 -- 4
 
@@ -143,25 +143,25 @@ data Which a = ThisOne a | ThatOne a
 instance Eq a => Eq (Which a) where
     (==) (ThisOne x) (ThisOne x') = x == x'
     (==) (ThatOne x) (ThatOne x') = x == x'
-    (==) _ _ = False
+    (==) _ _                      = False
 
 -- 7
 
 data EitherOr a b = Hello a | Goodbye b
 
 instance (Eq a, Eq b) => Eq (EitherOr a b) where
-    (==) (Hello x) (Hello x') = x == x'
+    (==) (Hello x) (Hello x')     = x == x'
     (==) (Goodbye y) (Goodbye y') = y == y'
-    (==) _ _ = False
+    (==) _ _                      = False
 
 -- Ord Instances
 
 instance Ord DayOfWeek where
     compare Fri Fri = EQ
-    compare Fri _ = GT
-    compare _ Fri = LT
-    compare _ _ = EQ
-    
+    compare Fri _   = GT
+    compare _ Fri   = LT
+    compare _ _     = EQ
+
 -- 6.13 Gimme More Operations
 
 -- 6.14 Chapter Exercises
@@ -184,3 +184,47 @@ data Person = Person Bool deriving (Show)
 
 printPerson :: Person -> IO ()
 printPerson person = putStrLn (show person)
+
+-- 2
+
+data Mood = Blah | Woot deriving (Show, Eq)
+
+settleDown :: Mood -> Mood
+settleDown x = if x == Woot
+                  then Blah
+                  else x
+
+-- 3
+-- a) Values of mood type are acceptable
+-- b) settleDown 9 will return an error, as 9 is an Int, which does not have an instance of Mood
+-- c) Blah > Woot returns and error because the type does not derive Ordering
+
+-- 4
+type Subject = String
+type Verb = String
+type Object = String
+
+data Sentence = Sentence Subject Verb Object deriving (Eq, Show)
+
+s1 = Sentence "dogs" "drool" "everywhere"
+s2 = Sentence "Julie" "loves" "dogs"
+
+-- Datatype declarations
+
+data Rocks = Rocks String deriving (Eq, Show,Ord)
+data Yeah = Yeah Bool deriving (Eq, Show,Ord)
+data Papu = Papu Rocks Yeah deriving (Eq, Show, Ord)
+
+-- 1
+phew = Papu (Rocks "chases") (Yeah True)
+
+-- 2
+truth = Papu (Rocks "chomskydoz") (Yeah True)
+
+-- 3
+equalityForAll :: Papu -> Papu -> Bool
+equalityForAll p p' = p == p'
+
+-- 4
+comparePapus :: Papu -> Papu -> Bool
+comparePapus p p' = p > p'
