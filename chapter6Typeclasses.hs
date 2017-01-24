@@ -72,7 +72,7 @@ instance Eq Trivial where
   Trivial' == Trivial' = True
 
 data DayOfWeek =
-  Mon | Tue | Wed | Thu | Fri | Sat | Sun deriving (Ord, Show)
+  Mon | Tue | Wed | Thu | Fri | Sat | Sun deriving (Show)
 
 data Date =
   Date DayOfWeek Int
@@ -155,3 +155,32 @@ instance (Eq a, Eq b) => Eq (EitherOr a b) where
     (==) _ _ = False
 
 -- Ord Instances
+
+instance Ord DayOfWeek where
+    compare Fri Fri = EQ
+    compare Fri _ = GT
+    compare _ Fri = LT
+    compare _ _ = EQ
+    
+-- 6.13 Gimme More Operations
+
+-- 6.14 Chapter Exercises
+
+-- 1) The eq class makes equality test possible
+-- 2) The Typeclass Ord is a subclass of Eq
+-- 3) (>) :: Ord a => a -> a -> Bool
+-- 4) in x = divMod 16 12, x is a tuple
+-- 5) the typeclass Integral includes int and integer numbers
+
+-- x :: Int -> Int
+-- x blah = blah + 20
+
+-- printIt :: IO ()
+-- printIt = putStrLn (show x)
+
+-- 1
+
+data Person = Person Bool deriving (Show)
+
+printPerson :: Person -> IO ()
+printPerson person = putStrLn (show person)
