@@ -1,3 +1,5 @@
+import           Data.List
+
 -- 6.1 typeclasses (Eq, Num, Ord, Enum, Show)
 
 -- 6.2 What are typeclasses
@@ -228,3 +230,88 @@ equalityForAll p p' = p == p'
 -- 4
 comparePapus :: Papu -> Papu -> Bool
 comparePapus p p' = p > p'
+
+-- Match the types
+
+-- 1
+-- i :: Num a => a
+-- i = 1
+-- replace type signature with:
+-- i :: a
+
+i ::Num a => a
+i = 1
+
+-- 2
+
+f :: Num a => a
+f = 1
+
+-- 3
+
+f' :: Fractional a => a
+f' = 1.0
+
+-- 4
+
+f'' :: RealFrac a => a
+f'' = 1.0
+
+-- 5
+
+freud :: Ord a => a -> a
+freud x = x
+
+-- 6
+
+freud' :: Int -> Int
+freud' x = x
+
+-- 7
+
+myX = 1 :: Int
+sigmund :: a -> Int
+sigmund x = myX
+
+-- 8
+
+sigmund' :: Num a => a -> Int
+sigmund' x = myX
+
+-- 9
+
+jung :: [Int] -> Int
+jung xs = head (sort xs)
+
+-- 10
+
+young :: Ord a => [a] -> a
+young xs = head (sort xs)
+
+-- 11
+
+mySort :: Ord a => [a] -> [a]
+mySort = sort
+
+signifier :: Ord a => [a] -> a
+signifier xs = head (mySort xs)
+
+-- Type-Kwon-Do 2
+
+-- 1
+
+chk :: Eq b => (a -> b) -> a -> b -> Bool
+chk f x y = (f x) == y
+
+-- 2
+
+arith :: Num b => (a -> b) -> Int -> a -> b
+arith f x y = head (replicate x (f y))
+
+-- 6.15 Definitions
+
+-- Typeclass inheritance occurs when a typeclass has a superclass
+-- Side effects are how we refer to observable actions programs may take other than compute a value(function has an effect on the world)
+-- IO is the type for values whose evaluation bears the possiblity of causing side effects
+-- An instance is the definition of how a typeclass will work for a given type
+-- Derived instances allow obvious typeclasses like Eq to have the instances generated bases only on how the datatype is defined
