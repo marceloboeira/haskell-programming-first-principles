@@ -1,3 +1,4 @@
+import           Data.Char
 
 -- 9.1 Lists
 -- a) a way ot refer to and process a collection or plurality of values
@@ -281,7 +282,70 @@ howManyMultiples n list = length $ multiplesOf n list
 
 articles = ["the", "a", "an"]
 
+checkForArticle :: [Char] -> Bool
+checkForArticle word = elem word articles
 
---removeArticles :: [Char] -> [Char]
+concatList :: [String] -> String
+concatList []     = []
+concatList (x:xs) = x ++ " " ++ concatList xs
+
+removeArticles :: String -> [String]
 removeArticles [] = []
-removeArticles sentence = let (x:xs) = myWords sentence
+removeArticles sentence
+  | checkForArticle x = removeArticles (concatList xs)
+  | otherwise = x : removeArticles (concatList xs)
+  where (x:xs) = myWords sentence
+
+-- 9.11 Zipping lists
+
+-- zipping exercises
+--1
+zip' :: [a] -> [b] -> [(a, b)]
+zip' _ []          = []
+zip' [] _          = []
+zip' (x:xs) (y:ys) = (x, y) : zip' xs ys
+
+--2
+
+zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith' _ _ []          = []
+zipWith' _ [] _          = []
+zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
+
+--3
+
+zip'' :: [a] -> [b] -> [(a, b)]
+zip'' x y = zipWith' (\x y -> (x, y)) x y
+
+-- 9.12 Chapter Exercises
+
+-- Data.Char
+
+--2
+
+removeLower :: [Char] -> [Char]
+removeLower [] = []
+removeLower (x:xs)
+  | isUpper x = x : removeLower xs
+  | otherwise = removeLower xs
+
+--3
+
+capitalizeFirst :: [Char] -> [Char]
+capitalizeFirst []     = []
+capitalizeFirst (x:xs) = toUpper x : xs
+
+--4
+
+capitalizeAll :: [Char] -> [Char]
+capitalizeAll []     = []
+capitalizeAll (x:xs) = toUpper x : capitalizeAll xs
+
+--5
+
+onlyFirst :: [Char] -> Maybe Char
+onlyFirst []     = Nothing
+onlyFirst (x:xs) = Just $ toUpper x
+
+--6
+
