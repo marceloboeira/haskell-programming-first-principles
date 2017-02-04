@@ -366,3 +366,35 @@ uncipher [] = []
 uncipher message = chr (ord x - 5) : uncipher xs
                  where (x:xs) = message
 -- this does not unambiguously handle characters outside of A through Z, including spaces...
+
+-- improvedCipher :: [Char] -> [Char]
+-- improvedCipher [] = []
+-- improvedCipher " " = " "
+-- improvedCipher "." = "."
+-- improvedCipher message = chr (65 + (mod ((5 + ord x) - 65) 26)) : improvedCipher xs
+--                  where (x:xs) = allToUpper message
+-- Pattern matching for periods does not work in this case, cannot compare single list element to tail of list unless it happens to be last. Use fmap
+
+singleCipher :: Char -> Char
+singleCipher a
+  | x >= 65 && x <= 90 = chr (65 + mod ((5 + x) - 65) 26)
+  | otherwise = a
+  where x = ord (toUpper a)
+
+  --chr (65 + (mod ((5 + ord x) - 65) 26))
+
+fmapCipher :: [Char] -> [Char]
+fmapCipher message = fmap singleCipher message
+
+
+-- decomposing and fmaping maybe values
+
+maybeIntToMaybeChar :: Maybe Int -> Maybe Char
+maybeIntToMaybeChar maybe = fmap chr maybe
+
+x = Just 65 :: Maybe Int
+y = Nothing :: Maybe Int
+
+maybeFold :: Maybe Int -> Int -> Int
+maybeFold (Just x) _ = x
+maybeFold Nothing y  = y
