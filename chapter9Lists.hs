@@ -349,3 +349,20 @@ onlyFirst (x:xs) = Just $ toUpper x
 
 --6
 
+-- Ciphers
+
+allToUpper :: [Char] -> [Char]
+allToUpper []     = []
+allToUpper (x:xs) = toUpper x : allToUpper xs
+
+
+cipher :: [Char] -> [Char]
+cipher []     = []
+cipher message = chr (65 + (mod ((5 + ord x) - 65) 26)) : cipher xs
+                 where (x:xs) = allToUpper message
+
+uncipher :: [Char] -> [Char]
+uncipher [] = []
+uncipher message = chr (ord x - 5) : uncipher xs
+                 where (x:xs) = message
+-- this does not unambiguously handle characters outside of A through Z, including spaces...
