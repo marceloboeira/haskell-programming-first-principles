@@ -381,11 +381,19 @@ singleCipher a
   | otherwise = a
   where x = ord (toUpper a)
 
+singleUnCipher :: Char -> Char
+singleUnCipher a
+  | x >= 65 && x <= 90 = chr (65 + mod ((x - 5) - 65) 26)
+  | otherwise = a
+  where x = ord (toUpper a)
+
   --chr (65 + (mod ((5 + ord x) - 65) 26))
 
 fmapCipher :: [Char] -> [Char]
 fmapCipher message = fmap singleCipher message
 
+unFmapCipher :: [Char] -> [Char]
+unFmapCipher message = fmap singleUnCipher message
 
 -- decomposing and fmaping maybe values
 
@@ -398,3 +406,78 @@ y = Nothing :: Maybe Int
 maybeFold :: Maybe Int -> Int -> Int
 maybeFold (Just x) _ = x
 maybeFold Nothing y  = y
+
+
+-- writing standard functions
+
+--1
+
+myOr :: [Bool] -> Bool
+myOr []     = False
+myOr (x:xs) = if x == True then True else myOr xs
+
+-- 2
+
+myAny :: (a -> Bool) -> [a] -> Bool
+myAny _ []     = False
+myAny f (x:xs) = if f x == True then True else myAny f xs
+
+-- 3
+
+myElem :: Eq a => a -> [a] -> Bool
+myElem a list = myAny (== a) list
+
+-- 4
+
+myReverse :: [a] -> [a]
+myReverse []   = []
+myReverse list = last list : myReverse (init list)
+
+--myReverseHelper :: [a] -> [a]
+--myReverseHelper (x:consumingTail) = x : []
+
+-- 5
+
+squish :: [[a]] -> [a]
+squish []     = []
+squish (x:xs) = x ++ squish xs
+
+-- 6
+
+squishMap :: (a -> [b]) -> [a] -> [b]
+squishMap _ []     = []
+squishMap f (x:xs) = f x ++ squishMap f xs
+
+-- 7
+
+squishAgain :: [[a]] -> [a]
+squishAgain list = squishMap id list
+
+-- 8
+
+returnGreater :: Ord a => Maybe a -> Maybe a -> Maybe a
+returnGreater (Just a) Nothing = Just a
+returnGreater (Just a) (Just b)
+  | a > b = Just a
+  | otherwise = Just b
+
+myMaximum :: Ord a => [a] -> Maybe a
+myMaximum []     = Nothing
+myMaximum (x:xs) = returnGreater (Just x) (myMaximum xs)
+
+-- myMaximumBy :: Ord a => (a -> a -> Ordering) -> [a] -> a
+-- myMaximumBy f (x:xs)
+--   | f x (head xs)
+
+-- 9
+
+returnLesser :: Ord a => Maybe a -> Maybe a -> Maybe a
+returnLesser (Just a) Nothing = Just a
+returnLesser (Just a) (Just b)
+  | a < b = Just a
+  | otherwise = Just b
+
+myMinimum :: Ord a => [a] -> Maybe a
+myMinimum []     = Nothing
+myMinimum (x:xs) = returnLesser (Just x) (myMinimum xs)
+
