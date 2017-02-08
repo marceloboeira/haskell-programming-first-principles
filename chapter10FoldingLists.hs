@@ -186,8 +186,8 @@ checkDate :: DatabaseItem -> Bool
 checkDate (DbDate _) = True
 checkDate _          = False
 
-check2Date :: DatabaseItem -> Bool -> Bool
-check2Date dI b = checkDate dI || b
+--check2Date :: DatabaseItem -> Bool -> Bool
+--check2Date dI b = checkDate dI || b
 
 check2Date' :: DatabaseItem -> [UTCTime] -> [UTCTime]
 check2Date' (DbDate t) utcTimes = t : utcTimes
@@ -201,3 +201,38 @@ listNonEmpty []    = False
 
 filterDbDate :: [DatabaseItem] -> [UTCTime]
 filterDbDate database = foldr check2Date' [] database
+
+-- 2
+
+check2Numbers :: DatabaseItem -> [Integer] -> [Integer]
+check2Numbers (DbNumber n) numbers = n : numbers
+check2Numbers _ numbers            = numbers
+
+filterDbNumbers :: [DatabaseItem] -> [Integer]
+filterDbNumbers database = foldr check2Numbers [] database
+
+-- 3
+compareDates :: UTCTime -> UTCTime -> UTCTime
+compareDates d x
+  | d > x = d
+  | otherwise = x
+
+dateIdentity = (UTCTime (fromGregorian 0000 0 0) (secondsToDiffTime 0))
+
+mostRecent :: [DatabaseItem] -> UTCTime
+mostRecent database = foldr compareDates dateIdentity dates
+  where dates = filterDbDate database
+
+-- 4
+
+sumDb :: [DatabaseItem] -> Integer
+sumDb database = foldr (+) 0 nums
+  where nums = filterDbNumbers database
+
+-- 5
+
+avgDb :: [DatabaseItem] -> Double
+avgDb database = (fromIntegral . sumDb $ database)/ count
+   where count = fromIntegral . length . filterDbNumbers $ database
+
+-- 10.7 Folding and evaluation
