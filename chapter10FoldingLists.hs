@@ -167,3 +167,37 @@ threeLetters = foldr (\ a b -> take 3 a ++ b) ""  ["Pizza", "Apple", "Banana"]
 
 -- Exercises: Database Processing
 
+data DatabaseItem = DbString String | DbNumber Integer | DbDate UTCTime deriving (Eq, Ord, Show)
+
+theDatabase :: [DatabaseItem]
+theDatabase =
+  [ DbDate (UTCTime
+            (fromGregorian 1911 5 1)
+    (secondsToDiffTime 34123))
+  , DbNumber 9001
+  , DbString "Hello, world!"
+  , DbDate (UTCTime
+            (fromGregorian 1921 5 1)
+            (secondsToDiffTime 34123))]
+
+-- 1
+
+checkDate :: DatabaseItem -> Bool
+checkDate (DbDate _) = True
+checkDate _          = False
+
+check2Date :: DatabaseItem -> Bool -> Bool
+check2Date dI b = checkDate dI || b
+
+check2Date' :: DatabaseItem -> [UTCTime] -> [UTCTime]
+check2Date' (DbDate t) utcTimes = t : utcTimes
+--check2Date' dbt@(DbDate _) utcTimes = dbt:utcTimes
+check2Date' _ utcTimes          = utcTimes
+
+
+listNonEmpty :: [a] -> Bool
+listNonEmpty (_:_) = True
+listNonEmpty []    = False
+
+filterDbDate :: [DatabaseItem] -> [UTCTime]
+filterDbDate database = foldr check2Date' [] database
