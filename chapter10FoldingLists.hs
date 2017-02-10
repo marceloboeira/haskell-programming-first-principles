@@ -137,7 +137,6 @@ foldr5f = foldr const 0 [1..5]
 -- g
 
 foldr5g = foldr const 'a' "tacos"
-
 -- h
 
 foldr5h = foldl (flip const) 'a' "burritos"
@@ -236,3 +235,115 @@ avgDb database = (fromIntegral . sumDb $ database)/ count
    where count = fromIntegral . length . filterDbNumbers $ database
 
 -- 10.7 Folding and evaluation
+
+-- foldr associates from the innermost cons cell to the outermost, while foldl recurses unconditionally to the end of the list through self-calls and then the folding function evaluates from the outermost cons cell to the innermost
+
+-- 10.8 summary
+
+-- foldr - the rest of the fold is an argument to the folding function you passed in
+         -- works with infinite lists
+
+-- foldl - self calls through the list, only begins to produce values after its reached the end of the list
+         -- associates to left
+         -- cannot be used with infinite lists
+         -- nearly useless -- should be replaced with foldl'
+
+-- 10.9 Scans
+
+-- scans accumulate values instead of keeping values separate, but return a list of results
+
+-- scanl (+) 1 [1..3]
+-- = [1, 1 + 1, (1 + 1) + 2, ((1 + 1) + 2) + 3]
+-- = [1,2,4,7]
+
+scanll :: (a -> b -> a) -> a -> [b] -> [a]
+scanll f q ls =
+  q : (case ls of
+         []   -> []
+         x:xs -> scanll f (f q x) xs)
+
+fibs = 1 : scanl (+) 1 fibs
+
+fibsN x = fibs !! x
+
+-- scans exercises
+
+-- 1
+
+first20 :: [Int]
+first20 = take 20 fibs
+
+-- 2
+recurseLess :: Int -> [Int] -> [Int]
+recurseLess _ [] = []
+recurseLess n (x:xs)
+  | x < n = x : recurseLess n xs
+  | otherwise = []
+
+recurseFibs100 :: [Int]
+recurseFibs100 = recurseLess 100 first20
+
+-- this recursive function is less efficient than using a function that prepends
+-- appending to a list is very inefficient, prepending is efficient
+
+lessList  :: Int -> [Int] -> [Int]
+lessList _ [] = []
+lessList x list
+  | x < 100 = x : list
+  | otherwise = list
+
+lessThan100 :: [Int]
+lessThan100 = foldr lessList [] first20
+
+--fibs' = filter (< 100) fibs
+
+fibs' = takeWhile (< 100) fibs
+
+-- 3
+
+
+-- 10.10 Chapter Exercises
+
+-- 1
+
+stops = "pbtdkg"
+vowels = "aeiou"
+
+t1 = "ab"
+t2 = "ab"
+-- a
+
+triple :: a -> b -> c -> (a,b,c)
+triple x y z = (x, y, z)
+
+
+stopVowelStop :: [a] -> [a] -> [(a, a, a)]
+stopVowelStop lista listb = [(x, y, z) | x <- lista, y <- listb, z <- lista]
+
+-- b
+firstElem :: (Char,b,c) -> Bool
+firstElem (x, _, _)
+  | x == 'p' = True
+  | otherwise = False
+
+stopVowelStop' :: [(Char,Char,Char)]
+stopVowelStop' = filter (firstElem) (stopVowelStop stops vowels)
+
+-- c
+
+nouns = ["ship", "house", "dog", "cat"]
+verbs = ["sink", "burns", "poops", "roars"]
+
+nounVerbNoun :: [String] -> [String] -> [String]
+nounVerbNoun lista listb = [x ++" "++ y ++" "++ z | x <- lista, y <- listb, z <- lista , x /= z]
+
+-- 2
+
+seekritFunc :: String -> Int
+seekritFunc x = div (sum (map length (words x)))
+                    (length (words x))
+-- finds average number of letters in words in the sentence, rounded down
+-- seekritFunc "Peter likes to program"
+-- 4
+-- seekritFunc "Mississippi collaborates adjuncively with Tennesseeeee"
+-- 10
