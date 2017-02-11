@@ -347,3 +347,157 @@ seekritFunc x = div (sum (map length (words x)))
 -- 4
 -- seekritFunc "Mississippi collaborates adjuncively with Tennesseeeee"
 -- 10
+
+--myFunc = foldr f z
+
+-- direct recursion, not usiing &&
+
+myAnd :: [Bool] -> Bool
+myAnd [] = True
+myAnd (x:xs) =
+  if x == False
+  then False
+  else myAnd xs
+
+-- direct recusion with &&
+
+myAnd' :: [Bool] -> Bool
+myAnd' []     = True
+myAnd' (x:xs) = x && myAnd xs
+
+-- fold without pointfree syntax
+
+myAndFold :: [Bool] -> Bool
+myAndFold = foldr (\a b -> if a == False then False else b) True
+
+-- fold with pointfree syntax
+
+myAndFold' :: [Bool] -> Bool
+myAndFold' = foldr (&&) True
+
+-- 1
+
+myOr :: [Bool] -> Bool
+myOr [] = False
+myOr (x:xs) =
+  if x == True
+  then True
+  else myOr xs
+
+myOr' :: [Bool] -> Bool
+myOr' []     = False
+myOr' (x:xs) = x || myOr' xs
+
+myOrFold :: [Bool] -> Bool
+myOrFold = foldr (\a b -> if a == True then True else b) False
+
+myOrFold' :: [Bool] -> Bool
+myOrFold' = foldr (||) False
+
+-- 2
+
+myAny :: (a -> Bool) -> [a] -> Bool
+myAny _ [] = False
+myAny f (x:xs) =
+  if f x == True then True
+  else myAny f xs
+
+myAnyFold :: (a -> Bool) -> [a] -> Bool
+myAnyFold f list = foldr (\a b -> if f a == True then True else b) False list
+
+-- 3
+
+myElem :: Eq a => a -> [a] -> Bool
+myElem _ []     = False
+myElem n (x:xs) = if n == x then True else myElem n xs
+
+myElemFold :: Eq a => a -> [a] -> Bool
+myElemFold n list = foldr (\a b -> if a == n then True else b) False list
+
+myElemAny :: Eq a => a -> [a] -> Bool
+myElemAny n list = myAny (==n) list
+
+-- 4
+
+myReverse :: [a] -> [a]
+myReverse []   = []
+myReverse list = last list : myReverse (init list)
+
+reverseHelper :: a -> [a] -> [a]
+reverseHelper x y = x : y
+
+myReverseFold :: [a] -> [a]
+myReverseFold list = foldl (flip reverseHelper) [] list
+-- Review this with associativity
+
+-- 5
+
+myMap :: (a -> b) -> [a] -> [b]
+myMap _ []     = []
+myMap f (x:xs) = f x : myMap f xs
+
+myMapFold :: (a -> b) -> [a] -> [b]
+myMapFold f list = foldr (\a b -> f a : b) [] list
+
+-- 6
+
+myFilter :: (a -> Bool) -> [a] -> [a]
+myFilter _ [] = []
+myFilter f (x:xs)
+  | f x == True = x : myFilter f xs
+  | otherwise = myFilter f xs
+
+myFilterHelper :: (a -> Bool) -> a -> [a] -> [a]
+myFilterHelper f x y
+  | f x == True = x : y
+  | otherwise = y
+
+myFilterFold :: (a -> Bool) -> [a] -> [a]
+myFilterFold f list = foldr (myFilterHelper f) [] list
+
+-- 7
+
+squish :: [[a]] -> [a]
+squish []     = []
+squish (x:xs) = x ++ squish xs
+
+squishFold :: [[a]] -> [a]
+squishFold list = foldr (++) [] list
+
+-- 8
+
+squishMap :: (a -> [b]) -> [a] -> [b]
+squishMap _ []     = []
+squishMap f (x:xs) = f x ++ squishMap f xs
+
+squishHelper :: (a -> [b]) -> a -> [b] -> [b]
+squishHelper f a b = f a ++ b
+
+squishMapFold :: (a -> [b]) -> [a] -> [b]
+squishMapFold f list = foldr (squishHelper f) [] list
+
+-- 9
+
+-- why does repl accept the previous example of (a -> [b]) when a and b are the same types, but forces me to distinguish here?
+
+-- helper :: a -> [b]
+-- helper x = [y]
+--   where y = id x
+
+-- squishAgain :: [[a]] -> [a]
+-- squishAgain list = squishMapFold  [] list
+
+-- 10
+
+myMaximumBy :: (a -> a -> Ordering) -> [a] -> a
+myMaximumBy _ (x:[]) = x
+myMaximumBy f (x:xs)
+  | f x (head xs) == GT = x
+  | otherwise = myMaximumBy f xs
+
+-- maxHelper :: (Ordering
+
+myMaximumByFold :: Num a => (a -> a -> Ordering) -> [a] -> a
+myMaximumByFold f list = foldr (\x y -> if f x y == GT then x else y) 0 list
+
+-- change identity so all cases work
