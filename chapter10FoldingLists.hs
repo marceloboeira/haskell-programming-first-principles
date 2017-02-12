@@ -466,6 +466,8 @@ squishFold list = foldr (++) [] list
 
 -- 8
 
+-- Bind
+
 squishMap :: (a -> [b]) -> [a] -> [b]
 squishMap _ []     = []
 squishMap f (x:xs) = f x ++ squishMap f xs
@@ -480,12 +482,19 @@ squishMapFold f list = foldr (squishHelper f) [] list
 
 -- why does repl accept the previous example of (a -> [b]) when a and b are the same types, but forces me to distinguish here?
 
--- helper :: a -> [b]
--- helper x = [y]
+--Pure
+
+--helper :: a -> [a]
+--helper list = squishAgainFold (\x -> [x]) list
 --   where y = id x
 
--- squishAgain :: [[a]] -> [a]
--- squishAgain list = squishMapFold  [] list
+-- Join
+
+--squishAgain :: [[a]] -> [a]
+--squishAgain list = squishMapFold helper list
+
+squishAgainFold :: [[a]] -> [a]
+squishAgainFold list = foldr (squishMapFold id) [] list
 
 -- 10
 
