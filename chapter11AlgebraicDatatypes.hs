@@ -1,5 +1,8 @@
-import           Data.Int
+{-# LANGUAGE FlexibleInstances #-}
 
+--{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+import           Data.Int
+import           Data.List
 -- 11.1 Algebraic datatypes
 
 -- how to construct your own datatypes in Haskell- use to leverage pattern matching, type checking, and inference
@@ -274,6 +277,158 @@ instance TooMany Goatss where
 newtype SuperGoats = SuperGoats (Int, String) deriving (Eq, Show)
 
 -- 2
+newtype Tuple = Tuple (Int, Int)
+
+instance TooMany Tuple where
+  tooMany (Tuple (a, b)) = tooMany (a + b)
 
 instance TooMany (Int, Int) where
-  tooMany (a,b) = tooMany (a + b)
+  tooMany (a, b) = tooMany (a + b)
+
+-- 3
+
+--data Num3 a = Num3 (Num a , TooMany a)
+
+--instance TooMany (a,TooMany a) where
+--  tooMany (Num a, TooMany b) = tooMany (a + b)
+
+-- flexible instances allows this to compile, but it fails at runtime.
+
+-- 11.8 Sum types
+
+-- ie data Bool = False | True
+
+-- "|" "or" defines the sum type
+
+-- find cardinality by adding cardinalities of data constructors ie cardinality of Bool is 2
+
+-- Exercises: Pity the Bool
+
+-- 1
+data BigSmall = Big Bool | Small Bool deriving (Eq, Show)
+
+-- cardinality = 4
+
+-- 2
+
+data NumberOrBool = Numba Int8 | BoolyBool Bool deriving (Eq, Show)
+
+-- cardinality = 256 + 2 = 258
+
+-- 11.9 Product Types
+
+-- A product type's cardinaliyt is the product of the cardinality of its inhabitants... products let us carry multiple values around in a single data constructor (any data constructor with two or more type arguments is a product)
+
+data QuantumBool = QuantumTrue | QuantumFalse | QuantumBoth deriving (Eq, Show)
+-- cardinality of 3
+
+data TwoQs = MkTwoQs QuantumBool QuantumBool deriving (Eq, Show)
+
+-- can use type aliases to same effect
+type TwoQs' = (QuantumBool, QuantumBool)
+-- this creates a type constructor and not a data constructors
+-- cardinality of 9?
+
+-- Record Syntax - Product types with additional syntax to provide accessors
+
+-- creating a "record" with the familiar data structure construction method
+data Person = MkPerson String Int deriving (Eq, Show)
+
+jm = MkPerson "julie" 108
+ca = MkPerson "chris" 16
+
+namae :: Person -> String
+namae (MkPerson s _) = s
+
+-- now same thing with record syntax
+
+data Person' = Person' { name :: String, age :: Int } deriving (Eq, Show)
+
+-- Exercises: Jammin
+
+data Fruit = Apple | Blackberry | Peach | Plum deriving (Eq, Show, Ord)
+
+data JamJars = Jam Fruit Int deriving (Eq, Show)
+
+-- 2
+
+data JammJars = Jamm { fruit :: Fruit, jars :: Int } deriving (Eq, Show, Ord)
+
+-- 3
+-- cardinality of JammJars is 4 x the range of Int16
+
+-- 4
+-- 5
+row1 = Jamm Peach 10
+row2 = Jamm Plum 13
+row3 = Jamm Apple 2
+row4 = Jamm Blackberry 30
+row5 = Jamm Plum 23
+row6 = Jamm Apple 30
+blank = Jamm Apple (-1)
+identity = [blank]
+
+allJam = [row1, row2, row3, row4, row5, row6]
+
+checkJars :: JammJars -> Int
+checkJars (Jamm _ n) = n
+
+checkStock :: [JammJars] -> [Int]
+checkStock list = fmap checkJars list
+
+-- 6
+
+totalJars :: [JammJars] -> Int
+totalJars list = foldr (\x y -> checkJars x + y) 0 list
+
+-- 7
+
+-- biggerRow :: JamJars -> JamJars -> JamJars
+-- biggerRow row1 row2
+--   | a > b = row1
+--   | otherwise = row2
+--   where (Jamm _ a) = row1
+--         (Jamm _ b) = row2
+
+biggerRow :: JammJars -> [JammJars] -> [JammJars]
+biggerRow a@(Jamm _ x) b@((Jamm _ y):ys)
+  | x > y = [a]
+  | y > x = b
+  | otherwise = [a] ++ b
+
+mostRow :: [JammJars] -> [JammJars]
+mostRow list = foldr biggerRow [blank] list
+
+-- 8
+
+-- 9
+
+compareKind :: JammJars -> JammJars -> Ordering
+compareKind (Jamm k _) (Jamm k' _) = compare k k'
+
+sortJams :: [JammJars] -> [JammJars]
+sortJams list = sortBy compareKind list
+
+-- jamHelper :: JammJars -> [JammJars] -> [JammJars]
+-- jamHelper a [] = [a]
+-- jamHelper a@(Jamm x n) b@((Jamm y n2):ys)
+--   | x < y = a : b
+--   | x > y = (Jamm y n2) : a : ys
+--   | n < n2 = a : b
+--   | otherwise = a : b
+
+-- foldJams :: [JammJars] -> [JammJars]
+-- foldJams list = foldr jamHelper [] list
+
+-- 10
+
+matchJams :: JammJars -> JammJars -> Bool
+matchJams (Jamm k _) (Jamm k' _) = k == k'
+
+groupJams :: [JammJars] -> [[JammJars]]
+groupJams list = groupBy matchJams sortedList
+  where sortedList = sortJams list
+
+-- list must be previously sorted for groupBy to work... cannot group discontinous groups
+
+-- 11.10 Normal Form
