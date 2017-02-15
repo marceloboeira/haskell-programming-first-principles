@@ -432,3 +432,183 @@ groupJams list = groupBy matchJams sortedList
 -- list must be previously sorted for groupBy to work... cannot group discontinous groups
 
 -- 11.10 Normal Form
+-- distributive property (2 * (3 + 4)) = 2*7 = 14 is same as 2*3 + 2*4 = 14 (sum of products)
+
+-- generalized distributive property: a * (b + c) -> (a * b) + (a * c)
+-- this works in haskell too... product types distribute over sum types
+
+data Fiction = Fiction deriving Show
+data Nonfiction = Nonfiction deriving Show
+-- single Nullary inhabitants (Fiction and nonfiction)
+data BookType = FictionBook Fiction | NonfictionBook Nonfiction deriving Show
+
+type AuthorName = String
+
+data Author = Author (AuthorName, BookType)
+
+-- apply distributive propery to Author
+
+data Author' = Fiction' AuthorName | Nonfiction' AuthorName deriving (Eq, Show)
+
+data Expr =
+    Number Int
+  | Add Expr Expr
+  | Minus Expr
+  | Mult Expr
+  | Divide Expr Expr
+
+-- this in in normal form because it's the sum type of products
+-- stricter version of same thing:
+
+type Number = Int
+type Add = (Expr, Expr)
+type Minus = Expr
+type Mult = (Expr, Expr)
+type Divide = (Expr, Expr)
+
+-- type Expr =
+--   Either Number
+--     (Either add
+--       (Either minus
+--         (Either Mult Divide)))
+
+-- Exercises: How Does Your Garden Grow?
+
+-- 1
+
+data FlowerType = Gardenia | Daisy | Rose | Lilac deriving Show
+
+type Gardener = String
+
+data Garden = Garden Gardener FlowerType deriving Show
+
+-- normal form
+
+data NormalGarden = Gardenia' Gardener | Daisy' Gardener | Rose' Gardener | Lilac' Gardener deriving Show
+
+-- 11.11 Constructing and deconstructing values
+
+data GuessWhat = Chickenbutt deriving (Eq, Show)
+
+data Id a = MkId a deriving (Eq, Show)
+
+data Product a b = Product a b deriving (Eq, Show)
+
+data Sum a b = First a | Second b deriving (Eq, Show)
+
+data RecordProduct a b = RecordProduct { pfirst :: a, psecond :: b} deriving (Eq, Show)
+
+-- Sum and Product
+
+data Farmhouse = Farmhouse NumCow NumPig deriving (Eq, Show)
+
+newtype NumCow = NumCow Int deriving (Eq, Show)
+
+newtype NumPig = NumPig Int deriving (Eq, Show)
+
+type Farmhouse' = Product NumCow NumPig
+
+newtype NumSheep = NumSheep Int deriving (Eq, Show)
+
+data BigFarmhouse = BigFarmhouse NumCow NumPig NumSheep deriving (Eq, Show)
+
+-- can nest products
+type BigFarmhouse' = Product NumCow (Product NumPig NumSheep)
+
+-- with sum
+
+type Name = String
+type Age = Int
+type LovesMud = Bool
+
+type PoundsOfWool = Int
+
+data CowInfo = CowInfo Name Age deriving (Eq, Show)
+
+data PigInfo = PigInfo Name Age LovesMud deriving (Eq, Show)
+
+data SheepInfo = SheepInfo Name Age PoundsOfWool deriving (Eq, Show)
+
+data Animal = Cow CowInfo | Pig PigInfo | Sheep SheepInfo deriving (Eq, Show)
+
+-- or
+
+type Animal' = Sum CowInfo (Sum PigInfo SheepInfo)
+
+-- Constructing Values
+
+trivialValue :: GuessWhat
+trivialValue = Chickenbutt
+
+data Id' a = MkId' a deriving (Eq, Show)
+
+idInt :: Id' Integer
+idInt = MkId' 10
+-- functions are values in haskell
+
+idIdentity :: Id' (a -> a)
+idIdentity = MkId' $ \x -> x
+
+type Awesome = Bool
+type Name' = String
+
+person :: Product Name' Awesome
+person = Product "Simon" True
+
+data Twitter = Twitter deriving (Eq, Show)
+
+data AskFm = AskFm deriving (Eq, Show)
+
+socialNetwork :: Sum Twitter AskFm
+socialNetwork = First Twitter
+
+data SocialNetwork = Twitter' | AskFm' deriving (Eq, Show)
+
+type Twitter' = String
+type AskFm' = String
+
+twitter :: Sum Twitter' AskFm'
+twitter = First "Twitter"
+
+askfm :: Sum Twitter' AskFm'
+askfm = First "AskFm"
+
+-- because we used type synonyms instead of defining datatypes, the type system did not catch this... cannot check strings
+
+myRecord :: RecordProduct Integer Float
+myRecord = RecordProduct {pfirst = 42, psecond = 0.00001}
+
+data OperatingSystem =
+       GnuPlusLinux
+     | OpenBSDPlusNevermindJustBSDStill
+     | Mac
+     | Windows
+     deriving (Eq, Show)
+
+data ProgrammingLanguage =
+      Haskell
+     |Agda
+     |Idris
+     |PureScript
+     deriving (Eq, Show)
+
+data Programmer =
+  Programmer { os :: OperatingSystem, lang :: ProgrammingLanguage }
+  deriving (Eq, Show)
+
+nineToFive :: Programmer
+nineToFive = Programmer { os = Mac, lang = Haskell }
+
+feelingWizardly :: Programmer
+feelingWizardly = Programmer { lang = Agda, os = GnuPlusLinux }
+
+-- Exercises: Programmers
+
+allOperatingSystems :: [OperatingSystem]
+allOperatingSystems = [GnuPlusLinux, OpenBSDPlusNevermindJustBSDStill, Mac, Windows]
+
+allLanguages :: [ProgrammingLanguage]
+allLanguages = [Haskell, Agda, Idris, PureScript]
+
+allProgrammers :: [Programmer]
+allProgrammers = [Programmer x y | x <- allOperatingSystems, y <- allLanguages]
