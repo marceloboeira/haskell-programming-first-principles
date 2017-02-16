@@ -612,3 +612,368 @@ allLanguages = [Haskell, Agda, Idris, PureScript]
 
 allProgrammers :: [Programmer]
 allProgrammers = [Programmer x y | x <- allOperatingSystems, y <- allLanguages]
+
+--
+
+data ThereYet = There Integer Float String Bool deriving (Eq, Show)
+
+nope :: Float -> String -> Bool -> ThereYet
+nope = There 10
+
+notYet :: String -> Bool -> ThereYet
+notYet = nope 25.5
+
+notQuite :: Bool -> ThereYet
+notQuite = notYet "woohoo"
+
+yuss :: ThereYet
+yuss = notQuite False
+
+--notice progression of types
+-- use this structure to avoid bottoms... allows us to partially fill in database without creating errors
+
+-- Deconstructing Values
+
+newtype Name'' = Name'' String deriving Show
+newtype Acres = Acres Int deriving Show
+
+data FarmerType = DairyFarmer | WheatFarmer | SoybeanFarmer deriving Show
+
+data Farmer = Farmer Name'' Acres FarmerType deriving Show
+
+-- breaking down this data type
+
+isDairyFarmer :: Farmer -> Bool
+isDairyFarmer (Farmer _ _ DairyFarmer) = True
+isDairyFarmer _                        = False
+
+-- same thing using record syntax
+
+data FarmerRec = FarmerRec { name'' :: Name'', acres :: Acres, farmerType :: FarmerType}
+  deriving Show
+
+isDairyFarmerRec :: FarmerRec -> Bool
+isDairyFarmerRec farmer = case farmerType  farmer of
+  DairyFarmer -> True
+  _           -> False
+
+--Don't do this:
+
+data Automobile = Null
+                | Car' { make :: String, model :: String, year :: Integer}
+                deriving (Eq, Show)
+-- conflicts between Null valuea and used record categories
+-- keep product types with record accessors separate from sum types wrapping it
+
+data Car'' = Car'' {make' :: String, model' :: String, year' :: Integer } deriving (Eq, Show)
+
+data Automobile' = Null' | Automobile Car''
+
+-- 11.12 Function type is exponential
+-- given a function a-> b, we can calculate the inhabitants with formula b^a
+-- ie a and b are bool = 2^2 = 4
+-- a -> b -> c ==> (c ^ b) ^ a ==> c ^ (b * a)
+
+-- review arithmetic of sum types
+
+data Quantum = Yes | No | Both deriving (Eq, Show)
+
+-- arithmetic of sum types 3 + 3
+
+quantSum1 :: Either Quantum Quantum
+quantSum1 = Right Yes
+
+quantSum2 :: Either Quantum Quantum
+quantSum2 = Right No
+
+quantSum3 :: Either Quantum Quantum
+quantSum3 = Right Both
+
+quantSum4 :: Either Quantum Quantum
+quantSum4 = Left Yes
+
+quantSum5 :: Either Quantum Quantum
+quantSum5 = Left No
+
+quantSum6 :: Either Quantum Quantum
+quantSum6 = Left Both
+
+-- arithmetic of product types 3 * 3
+
+quantProd1 :: (Quantum, Quantum)
+quantProd1 = (Yes, Yes)
+
+quantProd2 :: (Quantum, Quantum)
+quantProd2 = (Yes, No)
+
+quantProd3 :: (Quantum, Quantum)
+quantProd3 = (Yes, Both)
+
+quantProd4 :: (Quantum, Quantum)
+quantProd4 = (No, Yes)
+
+quantProd5 :: (Quantum, Quantum)
+quantProd5 = (No, No)
+
+quantProd6 :: (Quantum, Quantum)
+quantProd6 = (No, Both)
+
+quantProd7 :: (Quantum, Quantum)
+quantProd7 = (Both, Yes)
+
+quantProd8 :: (Quantum, Quantum)
+quantProd8 = (Both, No)
+
+quantProd9 :: (Quantum, Quantum)
+quantProd9 = (Both, Both)
+
+-- function type, each possible unique implementation of the function is an inhabitants
+-- 3 ^ 3
+
+quantFlip1 :: Quantum -> Quantum
+quantFlip1 Yes  = Yes
+quantFlip1 No   = Yes
+quantFlip1 Both = Yes
+
+quantFlip2 :: Quantum -> Quantum
+quantFlip2 Yes  = Yes
+quantFlip2 No   = Yes
+quantFlip2 Both = No
+
+quantFlip3 :: Quantum -> Quantum
+quantFlip3 Yes  = Yes
+quantFlip3 No   = Yes
+quantFlip3 Both = Both
+
+quantFlip4 :: Quantum -> Quantum
+quantFlip4 Yes  = Yes
+quantFlip4 No   = No
+quantFlip4 Both = Yes
+
+quantFlip5 :: Quantum -> Quantum
+quantFlip5 Yes  = Yes
+quantFlip5 No   = Both
+quantFlip5 Both = Yes
+
+quantFlip6 :: Quantum -> Quantum
+quantFlip6 Yes  = No
+quantFlip6 No   = Yes
+quantFlip6 Both = Yes
+
+quantFlip7 :: Quantum -> Quantum
+quantFlip7 Yes  = Both
+quantFlip7 No   = Yes
+quantFlip7 Both = Yes
+
+quantFlip8 :: Quantum -> Quantum
+quantFlip8 Yes  = Both
+quantFlip8 No   = Yes
+quantFlip8 Both = No
+
+quantFlip9 :: Quantum -> Quantum
+quantFlip9 Yes  = Both
+quantFlip9 No   = No
+quantFlip9 Both = No
+
+quantFlip10 :: Quantum -> Quantum
+quantFlip10 Yes  = Both
+quantFlip10 No   = No
+quantFlip10 Both = Both
+
+-- and so on through 3 ^ 3 combinations
+
+-- Exponentiation in what order?
+
+convert1 :: Quantum -> Bool
+convert1 Yes  = True
+convert1 No   = True
+convert1 Both = True
+
+convert2 :: Quantum -> Bool
+convert2 Yes  = True
+convert2 No   = True
+convert2 Both = False
+
+convert3 :: Quantum -> Bool
+convert3 Yes  = True
+convert3 No   = False
+convert3 Both = False
+
+convert4 :: Quantum -> Bool
+convert4 Yes  = False
+convert4 No   = False
+convert4 Both = False
+
+convert5 :: Quantum -> Bool
+convert5 Yes  = False
+convert5 No   = False
+convert5 Both = True
+
+convert6 :: Quantum -> Bool
+convert6 Yes  = False
+convert6 No   = True
+convert6 Both = True
+
+convert7 :: Quantum -> Bool
+convert7 Yes  = True
+convert7 No   = False
+convert7 Both = True
+
+convert8 :: Quantum -> Bool
+convert8 Yes  = False
+convert8 No   = True
+convert8 Both = False
+
+-- 8 combinations, as a-> b = b ^ a model predicts
+
+-- Exercises: The Quad (how many unique inhabitants)
+
+-- 1
+data Quad = One | Two | Three | Four deriving (Eq, Show)
+
+eQuad :: Either Quad Quad
+eQuad = undefined
+
+-- arithmetic sum = 4 + 4 = 8 unique inhabitants
+
+-- 2
+prodQuad :: (Quad, Quad)
+prodQuad = undefined
+
+-- product : 4 * 4 = 16 combinations
+
+-- 3
+funcQuad :: Quad -> Quad
+funcQuad = undefined
+-- func type: 4 ^ 4 = 256 combinations
+
+-- 4
+--prodTBool :: (Bool, Bool, Bool)
+--product :: 2 * 2 * 2 = 8 combinations
+
+-- 5
+gTwo :: Bool -> Bool -> Bool
+gTwo = undefined
+
+-- func type: 2 ^ 2 ^ 2 = 16
+
+-- 6
+--gTwo :: Bool -> Quad -> Quad
+--gTwo = undefined
+
+-- func type : 2 ^ 4 ^ 4 = 65536
+
+-- 11.3 Higher-kinded datatypes
+
+-- kinds are the types of type constructors (encoding the number of arguments they take)
+-- default in haskell is *
+-- kinds are not types until they are fully applied (* -> * -> *) must be applied twice before it is a real type
+
+data Silly a b c d = MkSilly a b c d deriving Show
+-- :k Silly
+--Silly :: * -> * -> * -> * -> *
+-- :k Silly Int String Bool String
+--Silly Int String Bool String :: *
+
+--data EsResultFound a = EsResultFound { _version :: DocVersion, _source :: a}
+--  deriving (Eq, Show)
+
+-- 11.14 Lists are Polymorphic-- lists can contain values of any type
+
+data Product' a b = a :&: b deriving (Eq, Show)
+
+-- list without infix
+
+data List a = Nil | Cons a (List a)
+
+-- 11.15 Binary Tree - recursive data structure
+
+data BinaryTree a = Leaf | Node (BinaryTree a) a (BinaryTree a) deriving (Eq, Ord, Show)
+
+-- Inserting into trees
+
+insert' :: Ord a => a -> BinaryTree a -> BinaryTree a
+insert' b Leaf = Node Leaf b Leaf
+insert' b (Node left a right)
+  | b == a = Node left a right
+  | b < a = Node (insert' b left) a right
+  | b > a = Node left a (insert' b right)
+
+-- Write map for BinaryTree -- write a map function for the data structure
+
+mapTree :: (a -> b) -> BinaryTree a -> BinaryTree b
+mapTree _ Leaf = Leaf
+mapTree f (Node left a right) =
+  Node (mapTree f left) (f a) (mapTree f right)
+
+testTree' :: BinaryTree Integer
+testTree' = Node (Node Leaf 3 Leaf) 1 (Node Leaf 4 Leaf)
+
+mapExpected = Node (Node Leaf 4 Leaf) 2 (Node Leaf 5 Leaf)
+
+mapOkay =
+  if mapTree (+1) testTree' == mapExpected
+  then print "yup okay!"
+  else error "test failed!"
+
+-- convert binary trees to lists
+
+--unlist :: [a] -> a
+--unlist [a] = a
+
+preorder :: BinaryTree a -> [a]
+preorder Leaf                = []
+preorder (Node left a right) = (a : (preorder left)) ++ preorder right
+
+-- assuming already ordered
+inorder :: BinaryTree a -> [a]
+inorder Leaf                = []
+inorder (Node left a right) = (inorder left) ++ [a] ++ inorder right
+-- write to order nodes as read...
+
+
+postorder :: BinaryTree a -> [a]
+postorder Leaf                = []
+postorder (Node left a right) = (postorder left) ++ (postorder right) ++ [a]
+
+testTree :: BinaryTree Integer
+testTree = Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)
+
+testPreorder :: IO ()
+testPreorder =
+  if preorder testTree == [2,1,3]
+  then putStrLn "Pass"
+  else putStrLn "Fail"
+
+testInorder :: IO ()
+testInorder =
+  if inorder testTree == [1,2,3]
+  then putStrLn "Pass"
+  else putStrLn "Fail"
+
+testPostorder :: IO ()
+testPostorder =
+  if postorder testTree == [1,3,2]
+  then putStrLn "Pass"
+  else putStrLn "Fail"
+
+main :: IO ()
+main = do
+  testPreorder
+  testInorder
+  testPostorder
+
+-- write foldr for binary tree
+
+foldTree :: (a -> b -> b) -> b -> BinaryTree a -> b
+foldTree f acc Leaf                = acc
+foldTree f acc (Node left a right) = f a (foldTree f acc right)
+-- only traverses to the right in a binary tree... believe function must accept 3 argments to traverse all branches?
+
+-- 11.16 Chapter Exercises
+
+-- 1
+-- weekday is a type with five data constructors
+
+-- 2
+-- continued in separate exercises file
