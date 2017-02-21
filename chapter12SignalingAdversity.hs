@@ -1,3 +1,4 @@
+import           Data.List
 
 -- 12.1 Signaling Adversity
 
@@ -283,4 +284,76 @@ eitherRight (Right b) = Just b
 -- 3
 
 partitionEithers' :: [Either a b] -> ([a],[b])
-partitionEithers' 
+partitionEithers' list = (lefts' list, rights' list)
+
+-- 4
+
+eitherMaybe' :: (b -> c) -> Either a b -> Maybe c
+eitherMaybe' f (Right b) = Just (f b)
+eitherMaybe' _ _         = Nothing
+
+-- 5
+
+either' :: (a -> c) -> (b -> c) -> Either a b -> c
+either' f1 _ (Left a)  = (f1 a)
+either' _ f2 (Right b) = (f2 b)
+
+-- 6
+
+leftToMaybe :: Either a b -> Maybe a
+leftToMaybe (Left a)  = Just a
+leftToMaybe (Right _) = Nothing
+
+eitherMaybe'' :: (b -> c) -> Either a b -> Maybe c
+eitherMaybe'' f (Right b) = Just (either' (\_ -> f b) f (Right b))
+
+eitherFoo = either' (\_ -> "Foo") (\_ -> "Foo") (Left 1234)
+eitherFoo' = either' (\_ -> "Foo") (\_ -> "Foo") (Right 12.34)
+
+-- Unfolds -- let us build up data structures
+
+-- unfoldr :: (b -> Maybe (a, b)) -> b -> [a]
+
+mehSum :: Num a => [a] -> a
+mehSum xs = go 0 xs
+  where go :: Num a => a -> [a] -> a
+        go n []     = n
+        go n (x:xs) = (go (n*x) xs)
+
+niceSum :: Num a => [a] -> a
+niceSum = foldl' (+) 0
+
+mehProduct :: Num a => [a] -> a
+mehProduct xs = go 1 xs
+  where go :: Num a => a -> [a] -> a
+        go n []=    n
+        go n (x:xs) = (go (n*x) xs)
+
+niceProduct :: Num a => [a] -> a
+niceProduct = foldl' (*) 1
+
+-- Write your own iterate and unfoldr
+
+-- 1
+
+myIterate :: (a -> a) -> a -> [a]
+myIterate f n = n : myIterate f (f n)
+
+-- 2
+pullMaybeA :: Maybe (a, b) -> [a]
+pullMaybeA (Just (a, _)) = [a]
+pullMaybeA Nothing       = []
+
+pullMaybeB :: Maybe (a, b) -> b
+pullMaybeB (Just (_, b)) = b
+pullMaybeB Nothing       = error "no b"
+
+myUnfoldr :: (Eq a, Eq b) => (b -> Maybe (a, b)) -> b -> [a]
+myUnfoldr f start
+  | f start == Nothing = []
+  | otherwise = pullMaybeA (f start) ++ (myUnfoldr f (pullMaybeB (f start)))
+
+-- test :: (b -> Maybe (a, b)) -> b  -> Bool
+-- test f start
+--   | f start == Nothing = True
+--   | otherwise = False
