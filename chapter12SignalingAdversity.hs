@@ -357,3 +357,44 @@ myUnfoldr f start
 -- test f start
 --   | f start == Nothing = True
 --   | otherwise = False
+
+-- 3
+
+maybeA :: (a -> a) -> a -> (Maybe (a, a))
+maybeA f a = Just (f a, a)
+maybeA _ _ = Nothing
+
+betterIterate :: (Eq a) => (a -> a) -> a -> [a]
+betterIterate f x = myUnfoldr (\x -> Just (x, f x)) x
+
+-- Finally Something other than a list
+
+data BinaryTree a = Leaf | Node (BinaryTree a) a (BinaryTree a) deriving (Eq, Ord, Show)
+
+unfoldTree :: (Eq a, Eq b) => (a -> Maybe (a, b, a)) -> a -> BinaryTree b
+unfoldTree f start
+  | f start == Nothing = Leaf
+  | otherwise = Node (unfoldTree f (pullLeft (f start))) (pullMiddle (f start)) (unfoldTree f (pullRight (f start)))
+
+pullLeft :: Maybe (a, b, a) -> a
+pullLeft (Just (a, _, _)) = a
+pullLeft Nothing          = error "no left"
+
+pullMiddle :: Maybe (a, b, a) -> b
+pullMiddle (Just (_, b, _)) = b
+pullMiddle Nothing          = error "no middle"
+
+pullRight :: Maybe (a, b, a) -> a
+pullRight (Just (_, _, a)) = a
+pullRight Nothing          = error "no right"
+
+-- 2
+
+treeBuild :: Integer -> BinaryTree Integer
+treeBuild n = unfoldTree comp n
+
+comp :: Integer -> Maybe (Integer, Integer, Integer)
+comp 0 = Nothing
+comp n = Just ((n-1), n, (n-1))
+
+-- find out how to make this count the other direction
