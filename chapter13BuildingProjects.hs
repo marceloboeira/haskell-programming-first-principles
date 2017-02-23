@@ -65,4 +65,23 @@ main = do c <- getChar
 -- it is bad form to use do blocks for single line expressions (will learn to use >>= instead of do)
 
 -- 13.9 Hangman game
--- see
+-- see hangman file
+
+-- 13.10 Step One: Importing Modules
+
+-- src/Main.hs
+
+-- 13.11 Step Two: Generating a word list
+
+-- 13.12 Step Three: Making a puzzle
+
+data Puzzle = Puzzle String [Maybe Char] [Char] deriving (Show)
+
+-- instance Show Puzzle where
+--   show (Puzzle _ discovered guessed) = (intersperse ' ' $ fmap renderPuzzleChar discovered) ++ " Guessed so far: " ++ guessed
+
+nothing :: Char -> Maybe Char
+nothing letter = Nothing
+
+freshPuzzle :: String -> Puzzle
+freshPuzzle word = Puzzle word (fmap nothing word) []
