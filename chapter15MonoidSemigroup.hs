@@ -1,5 +1,6 @@
 import           Data.Monoid
 
+
 -- 15.1 Monoids and semigroups
 
 -- 15.2 algebras
@@ -143,3 +144,48 @@ evilPlus = flip (+)
 -- 1 * 1 = 1
 
 -- Orphan Instances
+-- typeclasses have unique pairings of the class and the instance for a particular type
+-- multiple instances for a single type when orphan instances are written (avoid at all costs)
+
+-- orphan instance when instance is defined for a datatype and typeclass, but not in the same module as either the declaration of the typeclass or they datatype
+-- use newtype to avoid this
+-- see ListyInstances for example of orphan instance problems (duplicates)
+
+-- define type and typeclass in ths same module as instances
+-- define you rown newtype wrapping hte original type if needed
+
+-- a type must have a unique implementation of a typeclass in scope
+
+-- 15.11 Madness
+
+type Verb = String
+type Adjective = String
+type Adverb = String
+type Noun = String
+type Exclamation = String
+
+madlibbin' :: Exclamation -> Adverb -> Noun -> Adjective -> String
+madlibbin' e adv noun adj =
+  e <> "! he said " <>
+  adv <> " as he jumped into his car " <>
+  noun <> " and drove off with this " <>
+  adj <> " wife."
+
+-- rewrite this using mconcat
+
+madlibbinBetter' :: Exclamation -> Adverb -> Noun -> Adjective -> String
+madlibbinBetter' e adv noun adj =
+  mconcat [e, "! he said ", adv, " as he jumped into his car ", noun, " and drove off with this ", adj, " wife."]
+
+-- 15.12 Better living through QuickCheck
+-- a good way of geting a quick sense if laws are likely to be obeyed by an instance
+
+-- validating associativity with QuickCheck
+
+asc :: Eq a => (a -> a -> a) -> a -> a -> a -> Bool
+asc (<>) a b c = a <> (b <> c) == (a <> b) <> c
+
+monoidAssoc :: (Eq m, Monoid m) => m -> m -> m -> Bool
+monoidAssoc a b c = (a <> (b <>c)) == ((a <> b) <> c)
+
+-- must declare types so QuickCheck knows what types of data to generate
