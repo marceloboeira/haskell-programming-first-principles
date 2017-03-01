@@ -182,10 +182,33 @@ madlibbinBetter' e adv noun adj =
 
 -- validating associativity with QuickCheck
 
-asc :: Eq a => (a -> a -> a) -> a -> a -> a -> Bool
-asc (<>) a b c = a <> (b <> c) == (a <> b) <> c
+-- asc :: Eq a => (a -> a -> a) -> a -> a -> a -> Bool
+-- asc (<>) a b c = a <> (b <> c) == (a <> b) <> c
 
-monoidAssoc :: (Eq m, Monoid m) => m -> m -> m -> Bool
-monoidAssoc a b c = (a <> (b <>c)) == ((a <> b) <> c)
+-- monoidAssoc :: (Eq m, Monoid m) => m -> m -> m -> Bool
+-- monoidAssoc a b c = (a <> (b <>c)) == ((a <> b) <> c)
 
 -- must declare types so QuickCheck knows what types of data to generate
+
+-- 15.13 Semigroups
+
+-- to get from monoid to a semigroup, we no longer furnish nor require an identity (still binary and associative)
+
+--class Semigroup a where
+--  (<>) :: a -> a -> a
+
+--(a <> b) <> c = a <> (b <> c)
+-- semigroup is not yet part of base (unless GHC 8 or later)
+
+-- NonEmpty
+
+data NonEmpty a = a :| [a] deriving (Eq, Ord, Show)
+-- or
+newtype NonEmpty' a = NonEmpty (a, [a]) deriving (Eq, Ord, Show)
+-- can't write a monoid for NonEmpty because it has no identity by design
+
+data P = Prefix Int String
+
+data Q = Int :!!: String
+
+-- Moniod is stronger than Semigroup, it has a strict superset of the laws that Semigroup provides (Monoid superclasses semigroup)
