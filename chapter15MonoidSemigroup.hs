@@ -212,3 +212,5 @@ data P = Prefix Int String
 data Q = Int :!!: String
 
 -- Moniod is stronger than Semigroup, it has a strict superset of the laws that Semigroup provides (Monoid superclasses semigroup)
+
+-- Monoid > Semigroup > magma
