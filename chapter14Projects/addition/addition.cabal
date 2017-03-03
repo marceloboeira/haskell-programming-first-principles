@@ -13,11 +13,12 @@ build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md
 
-executable addition
+library
   hs-source-dirs:      .
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , hspec
+                     , QuickCheck
   exposed-modules:     Addition
   ghc-options:         -Wall -fwarn-tabs

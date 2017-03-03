@@ -46,7 +46,13 @@ type IdAssoc a = (Identity a) -> (Identity a) -> (Identity a) -> Bool
 
 data Two a b = Two a b deriving (Eq, Show)
 
-instance (Semigroup a) => Semigroup (Two a b) where
-  (Two a b) <> (Two c d) = Two ((a <> c) (b <> d))
+instance (Semigroup a, Semigroup b) => Semigroup (Two a b) where
+  (Two a b) <> (Two c d) = Two (a <> c) (b <> d)
 
+-- instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
+--   arbitrary = fmap Two (arbitrary arbitrary)
 
+-- instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
+--   arbitrary = oneof [liftM Left arbitrary, liftM Right arbitrary]
+--   shrink (Left x)  = [ Left  x' | x' <- shrink x ]
+--   shrink (Right y) = [ Right y' | y' <- shrink y ]
