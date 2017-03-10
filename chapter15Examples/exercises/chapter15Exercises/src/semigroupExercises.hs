@@ -20,7 +20,7 @@ semigroupAssoc a b c = (a <> (b <> c)) == ((a <> b) <> c)
 type TrivialAssoc = Trivial -> Trivial -> Trivial -> Bool
 
 main :: IO ()
-main = quickCheck (semigroupAssoc :: BoolAssoc)
+main = quickCheck (semigroupAssoc :: ValAssoc Int Int)
 
 -- 2
 
@@ -62,7 +62,7 @@ twoGen = do
 -- twoGenIntString = twoGen
 
 type TwoAssoc a b = (Two a b) -> (Two a b) -> (Two a b) -> Bool
-  
+
 
 -- instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
 --   arbitrary = oneof [liftM Left arbitrary, liftM Right arbitrary]
@@ -123,3 +123,100 @@ boolGen :: Gen BoolConj
 boolGen = elements [(BoolConj True), (BoolConj False)]
 
 type BoolAssoc = BoolConj -> BoolConj -> BoolConj -> Bool
+
+-- 7
+
+newtype BoolDisj = BoolDisj Bool deriving (Eq, Show)
+
+instance Semigroup BoolDisj where
+  (BoolDisj False) <> (BoolDisj False) = BoolDisj False
+  _ <> _ = BoolDisj True
+
+instance Arbitrary BoolDisj where
+  arbitrary = booljGen
+
+booljGen :: Gen BoolDisj
+booljGen = elements [(BoolDisj True), (BoolDisj False)]
+
+type BooljAssoc = BoolDisj -> BoolDisj -> BoolDisj -> Bool
+
+-- 8
+
+data Or a b = Fst a | Snd b deriving (Eq, Show)
+
+instance (Semigroup a, Semigroup b) => Semigroup (Or a b) where
+  (Snd b) <> _ = Snd b
+  (Fst a) <> (Snd b) = Snd b
+  (Fst a) <> (Fst b) = Fst b
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
+  arbitrary = orGen
+
+orGen :: (Arbitrary a, Arbitrary b) => Gen (Or a b)
+orGen = do
+  a <- arbitrary
+  b <- arbitrary
+  elements [(Fst a), (Snd b)]
+
+type OrAssoc a b = (Or a b) -> (Or a b) -> (Or a b) -> Bool
+
+-- 9
+
+newtype Combine a b = Combine { unCombine :: (a -> b) }
+
+instance (Semigroup a, Semigroup b) => Semigroup (Combine a b) where
+  (Combine f1) <> (Combine f2) = Combine (f1 <> f2)
+
+-- instance (Arbitrary a, Arbitrary b) => Arbitrary (Combine a b) where
+--   arbitrary = combGen
+
+-- combGen :: (Arbitrary b) => Gen (Combine a b)
+-- combGen = do
+--   b <- arbitrary
+--   return (Combine b)
+
+-- figure our CoArbitrary to quickCheck this
+
+-- 10
+
+newtype Comp a = Comp { unComp :: (a -> a) }
+
+instance (Semigroup a) => Semigroup (Comp a) where
+  (Comp f1) <> (Comp f2) = Comp (f1 <> f2)
+
+-- instance (Arbitrary a) => Arbitrary (Comp a) where
+--   arbitrary = compGen
+
+-- compGen :: (Arbitrary a) => Gen (Comp a)
+-- compGen = do
+--   a <- arbitrary
+--   return (Comp a)
+
+-- 11
+
+data Validation a b = Failure' a | Success' b deriving (Eq, Show)
+
+instance (Semigroup a, Semigroup b) => Semigroup (Validation a b) where
+  (Failure' a) <> (Failure' b) = Failure' (a <> b)
+  (Failure' a) <> _ = Failure' a
+  _ <> (Failure' b) = Failure' b
+  (Success' a) <> (Success' b) = Success' (a <> b)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Validation a b) where
+  arbitrary = valGen
+
+valGen :: (Arbitrary a, Arbitrary b) => Gen (Validation a b)
+valGen = do
+  a <- arbitrary
+  b <- arbitrary
+  elements [(Failure' a), (Success' b)]
+
+type ValAssoc a b = (Validation a b) -> (Validation a b) -> (Validation a b) -> Bool
+
+
+-- 12
+
+newtype AccumulateRight a b = AccumulateRight (Validation a b) deriving (Eq, Show)
+
+instance Semigroup b => Semigroup (AccumulateRight a b) where
+
