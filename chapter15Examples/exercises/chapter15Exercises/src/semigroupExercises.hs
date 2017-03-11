@@ -20,7 +20,7 @@ semigroupAssoc a b c = (a <> (b <> c)) == ((a <> b) <> c)
 type TrivialAssoc = Trivial -> Trivial -> Trivial -> Bool
 
 main :: IO ()
-main = quickCheck (semigroupAssoc :: ValAssoc Int Int)
+main = quickCheck (semigroupAssoc :: AccAssoc Int Int)
 
 -- 2
 
@@ -218,5 +218,40 @@ type ValAssoc a b = (Validation a b) -> (Validation a b) -> (Validation a b) -> 
 
 newtype AccumulateRight a b = AccumulateRight (Validation a b) deriving (Eq, Show)
 
-instance Semigroup b => Semigroup (AccumulateRight a b) where
+1instance (Semigroup a, Semigroup b) => Semigroup (AccumulateRight a b) where
+  AccumulateRight (Success' a) <> AccumulateRight (Success' b) = AccumulateRight $ Success' (a <> b)
+  AccumulateRight (Success' a) <> _ = AccumulateRight $ Success' a
+  _ <> AccumulateRight (Success' b) = AccumulateRight $ Success' b
+  AccumulateRight (Failure' a) <> AccumulateRight (Failure' b) = AccumulateRight $ Failure' (a <> b)
 
+instance (Arbitrary a, Arbitrary b) => Arbitrary (AccumulateRight a b) where
+  arbitrary = accGen
+
+accGen :: (Arbitrary a, Arbitrary b) => Gen (AccumulateRight a b)
+accGen = do
+  a <- arbitrary
+  b <- arbitrary
+  elements [(AccumulateRight (Failure' a)), (AccumulateRight (Success' b))]
+
+type AccAssoc a b = (AccumulateRight a b) -> (AccumulateRight a b) -> (AccumulateRight a b) -> Bool
+
+-- 13
+
+newtype AccumulateBoth a b = AccumulateBoth (Validation a b) deriving (Eq, Show)
+
+instance (Semigroup a, Semigroup b) => Semigroup (AccumulateBoth a b) where
+  AccumulateBoth (Failure' a) <> AccumulateBoth (Failure' b) = AccumulateBoth $ Failure' (a <> b)
+  AccumulateBoth (Failure' a) <> _ = AccumulateBoth $ Failure' a
+  _ <> AccumulateBoth (Failure' b) = AccumulateBoth $ Failure' b
+  AccumulateBoth (Success' a) <> AccumulateBoth (Success' b) = AccumulateBoth $ Success' (a <> b)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (AccumulateBoth a b) where
+  arbitrary = bothGen
+
+bothGen :: (Arbitrary a, Arbitrary b) => Gen (AccumulateBoth a b)
+bothGen = do
+  a <- arbitrary
+  b <- arbitrary
+  elements [(AccumulateBoth (Failure' a)), (AccumulateBoth (Success' b))]
+
+type BothAssoc a b = (AccumulateBoth a b) -> (AccumulateBoth a b) -> (AccumulateBoth a b) -> Bool
