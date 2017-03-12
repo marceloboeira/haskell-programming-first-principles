@@ -165,12 +165,23 @@ instance (Semigroup a) => Semigroup (Comp a) where
 
 newtype Mem s a = Mem { runMem :: s -> (a,s) }
 
-instance (Num s, Monoid a) => Monoid (Mem s a) where
-  mempty = Mem (\a -> [], a + 0)
-  mappend = undefined
+-- f1 :: s -> (a, s)
+-- f1 s0 = (a0, s1)
 
+-- f2 :: s -> (a, s)
+-- f2 s2 = (a2, s3)
 
-f' = Mem $ \s -> ("hi", s + 1)
+-- f3 :: s -> (a, s)
+-- f3 s0 = f2 (snd (f1 s0))
+
+instance (Monoid a) => Monoid (Mem s a) where
+  mempty = Mem (\s -> (mempty, s))
+  mappend (Mem f1) (Mem f2) = Mem (\s0 -> f2 (snd (f1 s0)))
+
+instance Semigroup (Mem s a) where
+  (Mem f1) <> (Mem f2) = Mem (\s0 -> f2 (snd (f1 s0)))
+
+f' = Mem $ \s -> ("hi", s + (1 :: Int))
 
 main' = do
   print $ runMem (f' <> mempty) 0
