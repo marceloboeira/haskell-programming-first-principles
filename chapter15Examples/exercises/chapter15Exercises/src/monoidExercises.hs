@@ -176,10 +176,10 @@ newtype Mem s a = Mem { runMem :: s -> (a,s) }
 
 instance (Monoid a) => Monoid (Mem s a) where
   mempty = Mem (\s -> (mempty, s))
-  mappend (Mem f1) (Mem f2) = Mem (\s0 -> f2 (snd (f1 s0)))
+  mappend (Mem f1) (Mem f2) = Mem (\s0 -> (fst (f2 (snd (f1 s0))), snd (f2 (snd (f1 s0)))))
 
-instance Semigroup (Mem s a) where
-  (Mem f1) <> (Mem f2) = Mem (\s0 -> f2 (snd (f1 s0)))
+instance (Semigroup a) => Semigroup (Mem s a) where
+  (Mem f1) <> (Mem f2) =  Mem (\s0 -> (((fst (f1 s0)) <> fst(f2(snd(f1 s0)))), (snd (f2 (snd (f1 s0))))))
 
 f' = Mem $ \s -> ("hi", s + (1 :: Int))
 
