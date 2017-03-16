@@ -1,4 +1,5 @@
 
+
 -- 16.1 Functor
 -- Monoid showed us what it means to talk about an algebra and turn it into a typeclass
 -- pattern is to abstract out a common pattern, make sure it follows defined laws, name it
@@ -179,3 +180,129 @@ functorIdentity f = fmap id f == f
 
 functorCompose :: (Eq (f c), Functor f) => (a -> b) -> (b -> c) -> f a -> Bool
 functorCompose f g x = (fmap g (fmap f x)) == (fmap (g . f) x)
+
+-- 16.11 Ignoring Possibilities
+
+-- Maybe
+
+incIfJust :: Num a => Maybe a -> Maybe a
+incIfJust (Just n) = Just $ n + 1
+incIfJust Nothing  = Nothing
+
+showIfJust :: Show a => Maybe a -> Maybe String
+showIfJust (Just s) = Just $ show s
+showIfJust Nothing  = Nothing
+
+-- this is redundant, sharing the Nothing case
+
+incMaybe :: Num a => Maybe a -> Maybe a
+incMaybe m = fmap (+1) m
+
+showMaybe :: Show a => Maybe a -> Maybe String
+showMaybe s = fmap show s
+
+-- this does the same thing, but we can abstract further (rewrite the without naming the arguments)
+
+incMaybe'' :: Num a => Maybe a -> Maybe a
+incMaybe'' = fmap (+1)
+
+showMaybe'' :: Show a => Maybe a -> Maybe String
+showMaybe'' = fmap show
+
+-- this does not even have to be specific to Maybe, fmap works for all datatypes with a functor instance
+
+--fmap (+1) :: (Functor f, Num b) => f b -> f b
+
+liftedInc :: (Functor f, Num b) => f b -> f b
+liftedInc = fmap (+1)
+
+-- this function is now more polymorphic and more widely usable
+
+-- Either
+
+incIfRight :: Num a => Either e a -> Either e a
+incIfRight (Right n) = Right $ n + 1
+incIfRight (Left e)  = (Left e)
+
+showIfRight :: Show a => Either e a -> Either e String
+showIfRight (Right s) = Right $ show s
+showIfRight (Left e)  = Left e
+
+-- simplify
+
+incEither :: Num a => Either e a -> Either e a
+incEither m = fmap (+ 1) m
+
+showEither :: Show a => Either e a -> Either e String
+showEither s = fmap show s
+
+-- simplify
+
+incEither' :: Num a => Either e a -> Either e a
+incEither' = fmap (+ 1)
+
+showEither' :: Show a => Either e a -> Either e String
+showEither' = fmap show
+
+-- broaden types
+
+liftedInc' :: (Functor f, Num b) => f b -> f b
+liftedInc' = fmap (+ 1)
+
+liftedShow :: (Functor f, Show a) => f a -> f String
+liftedShow = fmap show
+
+-- 16.12 const
+
+newtype Constant a b = Constant { getConstant :: a } deriving (Eq, Show)
+
+-- b is a phantom type because it has not corresponding witness at the value/term level
+
+-- Constant is still kind * -> * -> *
+-- must apply Constant to have a functor
+-- Constant a is kind * -> * and Constant a b is kind *
+
+instance Functor (Constant m) where
+  fmap _ (Constant v) = Constant v
+
+-- Const is a lawful Functor
+
+-- 16.13 More Structure, More Functors
+
+data Wrap f a = Wrap (f a) deriving (Eq, Show)
+
+-- instance Functor (Wrap f) where
+--   fmap f (Wrap fa) = Wrap (f fa)
+
+-- instance Functor (Wrap f) where
+--   fmap f (Wrap fa) = Wrap (fmap f fa)
+
+instance Functor f => Functor (Wrap f) where
+  fmap f (Wrap fa) = Wrap (fmap f fa)
+
+-- 16.14 IO Functor
+
+getInt :: IO Int
+getInt = fmap read getLine
+
+meTooIsm :: IO String
+meTooIsm = do
+  input <- getLine
+  return (input ++ "and me too!")
+
+bumpIt :: IO Int
+bumpIt = do
+  intVal <- getInt
+  return (intVal + 1)
+
+-- 16.15 something different
+
+-- what if we want to transform structure and leave the type argument alone
+-- natural transformations
+
+-- nat :: (f -> g) -> f a -> g a
+-- this type is impossible because we cant have higher kinded types as argument types to the function type
+
+-- type Nat f g = forall a. f a -> g a
+
+-- 16.16 Functors are unique to a datatype
