@@ -124,8 +124,10 @@ testVals = Cons 1 (Cons 2 Nil)
 
 -- ZipList Applicative Exercise
 
--- take' :: Int -> List a -> List a
--- take'
+take' :: Int -> List a -> List a
+take' _ (Nil)         = Nil
+take' 0 (Cons a _)    = Cons a Nil
+take' n (Cons a tail) = Cons a (take' (n-1) tail)
 
 newtype ZipList' a = ZipList' (List a) deriving (Eq, Show)
 
@@ -135,3 +137,30 @@ instance Eq a => EqProp (ZipList' a) where
               in take' 3000 l
           ys' = let (ZipList' l) = ys
               in take' 3000 l
+
+instance Functor ZipList' where
+  fmap f (ZipList' xs) = ZipList' $ fmap f xs
+
+instance Applicative ZipList' where
+  pure a = ZipList' (Cons a Nil)
+  ZipList' (Cons f listf) <*> ZipList' (Cons a lista) =
+    ZipList' (Cons (f a) (listf <*> lista))
+
+makeList :: [a] -> List a
+makeList []     = Nil
+makeList (x:xs) = Cons x (makeList xs)
+
+-- Exercise: Variations on Either
+
+data Validation' e a = Failure' e | Success' a deriving (Eq, Show)
+
+instance Functor (Validation' e) where
+  fmap _ (Failure' e) = Failure' e
+  fmap f (Success' a) = Success' (f a)
+
+instance Monoid e => Applicative (Validation' e) where
+  pure x = Success' x
+  Failure' e <*> Failure' e' = Failure' (e <> e')
+  Failure' e <*> _ = Failure' e
+  _ <*> Failure' e' = Failure' e'
+  Success' f <*> Success' a = Success' (f a)

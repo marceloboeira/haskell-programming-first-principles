@@ -240,3 +240,14 @@ myResult = pure ($ 2) `mApply` Just (+2)
 instance Monoid a => Monoid (ZipList a) where
   mempty = pure mempty
   mappend = liftA2 mappend
+
+--
+
+data Validation err a = Failure err | Success a deriving (Eq, Show)
+
+-- validation type avoids "short circuiting" when there is an error... combines with Monoid
+
+data Errors = DividedByZero | StackOverflow | MooglesChewedWires deriving (Eq, Show)
+
+-- success = Success (+1) <*> Success 1
+
