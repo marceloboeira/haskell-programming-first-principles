@@ -28,7 +28,27 @@ randomElement xs = do
   return (xs !! randomDigit)
 
 shortyGen :: IO [Char]
-shortyGen = replicateM 7 (randomElement alphaNum)
+shortyGen = replicateM 1 (randomElement alphaNum)
+
+smartShortyGen :: R.Connection -> IO (Either R.Reply [Char])
+smartShortyGen conn = do
+  -- shorty :: [Char]
+  shorty <- shortyGen
+  -- isUnique :: Either R.Reply Bool
+  isUnique <- checkUnique conn (BC.pack shorty)
+  _ <- putStrLn $ show isUnique
+  case isUnique of
+    (Left redisReply) -> return $ Left redisReply
+    (Right bool) -> case bool of
+      False -> smartShortyGen conn
+      True  -> return $ Right shorty
+
+checkUnique :: R.Connection -> BC.ByteString -> IO (Either R.Reply Bool)
+checkUnique conn shortURI = R.runRedis conn $ (fmap . fmap) checkSomething (R.get shortURI)
+
+checkSomething :: Maybe a -> Bool
+checkSomething (Just _) = False
+checkSomething Nothing  = True
 
 saveURI :: R.Connection
         -> BC.ByteString
@@ -92,3 +112,9 @@ main :: IO ()
 main = do
   rConn <- R.connect R.defaultConnectInfo
   scotty 3000 (app rConn)
+
+testMain :: IO ()
+testMain = do
+  rConn <- R.connect R.defaultConnectInfo
+  either <- checkUnique rConn "Z6JTGLM"
+  putStrLn $ show either
