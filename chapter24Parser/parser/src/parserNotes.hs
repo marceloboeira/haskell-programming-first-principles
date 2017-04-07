@@ -1,10 +1,11 @@
 {-# LANGUAGE InstanceSigs #-}
 
+
 import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.Trans.State
 import           System.Random
-
+import           Text.Parser.Combinators
 import           Text.Trifecta
 
 -- 24.1 Parser combinators
@@ -20,10 +21,6 @@ stop :: Parser a
 stop = unexpected "stop"
 
 -- unexpected is a means of throwing errors
-
-one = char '1'
-
-one' = one >> stop
 
 -- (>>) :: Monad m => m a -> m b -> m b
 
@@ -44,9 +41,13 @@ one' = one >> stop
 -- put :: Monad m => s -> StateT s m ()
 -- runStateT :: StateT s m a -> s -> m (a, s)
 
+one = char '1'
+one' = one >> stop
 
 oneTwo = char '1' >> char '2'
 oneTwo' = oneTwo >> stop
+
+
 
 testParse :: Parser Char -> IO ()
 testParse p =
@@ -65,3 +66,13 @@ main = do
   testParse oneTwo
   pNL "oneTwo':"
   testParse oneTwo'
+
+-- Exercises: Parsing Practice
+
+-- one and oneTwo fail if you include more than one char
+
+testParse' :: Parser Char -> IO ()
+testParse' p = print $ parseString p mempty "12"
+
+testStringParse :: Parser String -> IO ()
+testStringParse p = print $ parseString p mempty "123"
